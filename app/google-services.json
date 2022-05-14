@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "783196634526",
+    "project_id": "eonvis-64182",
+    "storage_bucket": "eonvis-64182.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783196634526:android:5761cfe6cd65a024dbea8f",
+        "android_client_info": {
+          "package_name": "hu.bme.aut.eonvis"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "783196634526-cc00632rg00cekk479cj5qn976s0vm59.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-PyZoc5MZMVSQ3dzKAhzKNNem4X67EnI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "783196634526-cc00632rg00cekk479cj5qn976s0vm59.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
