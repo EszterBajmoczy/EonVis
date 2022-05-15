@@ -5,13 +5,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import hu.bme.aut.eonvis.data.model.PowerConsume
-import javax.inject.Inject
 
 
-class EonVisService @Inject constructor()  {
-    private val mAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var db = FirebaseFirestore.getInstance()
-
+class EonVisService constructor(private val mAuth: FirebaseAuth, private var db: FirebaseFirestore)  {
     private var userId: String? = null
 
     init {
