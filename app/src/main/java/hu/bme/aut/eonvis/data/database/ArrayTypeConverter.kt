@@ -7,7 +7,10 @@ class ArrayTypeConverter {
     @TypeConverter
     fun fromArray(strings: List<String>?): String {
         var string = ""
-        for (s in strings!!) {
+        if(strings.isNullOrEmpty()) {
+            return string;
+        }
+        for (s in strings) {
             string += "$s,"
         }
         return string.substring(0, string.length - 1)
