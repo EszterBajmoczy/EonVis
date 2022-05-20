@@ -1,5 +1,6 @@
 package hu.bme.aut.eonvis.network
 
+import android.net.ConnectivityManager
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -25,30 +26,29 @@ class EonVisService constructor(private val mAuth: FirebaseAuth, private var db:
         callback(mAuth.currentUser != null)
     }
 
-    fun getPowerConsumes(callback: (List<PowerConsume>) -> Unit) {
+    fun getPowerConsumes(callback: (PowerConsume) -> Unit) {
         db.collection(userId!!).get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val list = ArrayList<PowerConsume>()
                 for (firebaseData in task.result!!.documents) {
                     try {
-                        val data = PowerConsume(
-                            id = firebaseData.getLong("id")!!,
-                            incoming = firebaseData.getDouble("incoming")!!,
-                            outgoing = firebaseData.getDouble("outgoing")!!)
                         firebaseData.reference.collection("tags")
                             .document("tags")
                             .get()
                             .addOnCompleteListener { tagData ->
+                                val data = PowerConsume(
+                                    id = firebaseData.getLong("id")!!,
+                                    incoming = firebaseData.getDouble("incoming")!!,
+                                    outgoing = firebaseData.getDouble("outgoing")!!)
                                 val tagList = ArrayList<String>()
                                 tagData.result.data?.values?.forEach { tag -> tagList.add(tag.toString()) }
                                 data.addTags(tagList)
+
+                                callback(data)
                             }
-                        list.add(data)
                     } catch (e: Exception){
                         Log.d("Firebase", "Invalid data format.")
                     }
                 }
-                callback(list)
             } else {
                 Log.d("Firebase", "No data for user")
             }

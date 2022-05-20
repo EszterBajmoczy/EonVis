@@ -1,5 +1,6 @@
 package hu.bme.aut.eonvis.ui.main
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import hu.bme.aut.eonvis.converter.DataConverter
@@ -27,25 +28,27 @@ class MainRepository @Inject constructor(private val eonVisDao: EonVisDao, priva
 
     fun getAll() : LiveData<List<PowerConsume>> {
         return eonVisDao.getAllData().map {
-                item -> item.map { data -> dataConverter.ConvertToModel(data) }
+                item -> item.map { data -> dataConverter.convertToModel(data) }
         }
     }
 
     fun syncData(scope: CoroutineScope, lastUpdate: Long, callback: (Long) -> Unit) {
         networkService.getPowerConsumes { result ->
             var lastDataId = lastUpdate
-            result.forEach {
-                if(it.id > lastUpdate){
-                    var data = dataConverter.ConvertToDTO(it)
-                    scope.launch {
+            if(result.id > lastUpdate){
+                val data = dataConverter.convertToDTO(result)
+                scope.launch {
+                    try{
                         add(data)
-                    }
-                    if(lastDataId < it.id){
-                        lastDataId = it.id
+                    } catch (e: Exception){
+                        Log.d("SyncError", "Unique key error")
                     }
                 }
+                if(lastDataId < result.id){
+                    lastDataId = result.id
+                }
             }
-            //TODO update lastUpdate sharedPref
+
             callback(lastDataId)
         }
     }
