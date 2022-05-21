@@ -22,10 +22,6 @@ class MainRepository @Inject constructor(private val eonVisDao: EonVisDao, priva
         eonVisDao.insertData(data)
     }
 
-    suspend fun updateTags(id: Long, tags: String) = withContext(Dispatchers.IO) {
-        eonVisDao.updateData(id, tags)
-    }
-
     fun getAll() : LiveData<List<PowerConsume>> {
         return eonVisDao.getAllData().map {
                 item -> item.map { data -> dataConverter.convertToModel(data) }

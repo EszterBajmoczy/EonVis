@@ -16,7 +16,6 @@ import android.widget.EditText
 import android.widget.Toast
 import dagger.hilt.android.AndroidEntryPoint
 import hu.bme.aut.eonvis.databinding.ActivityLoginBinding
-import hu.bme.aut.eonvis.ui.main.MainActivity
 import hu.bme.aut.eonvis.ui.main.MainComposeActivity
 
 import javax.inject.Inject

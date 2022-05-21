@@ -20,7 +20,6 @@ import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -28,14 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import dagger.hilt.android.AndroidEntryPoint
 import hu.bme.aut.eonvis.R
 import hu.bme.aut.eonvis.data.model.PowerConsume
-import hu.bme.aut.eonvis.ui.details.DetailsActivity
 import hu.bme.aut.eonvis.ui.details.DetailsComposeActivity
 import hu.bme.aut.eonvis.ui.main.ui.theme.EonVisTheme
 import javax.inject.Inject
@@ -54,6 +50,8 @@ class MainComposeActivity : ComponentActivity() {
 
     private val dataList = mutableStateOf(ArrayList<PowerConsume>())
 
+    private var internetAvailableMsg = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,7 +61,7 @@ class MainComposeActivity : ComponentActivity() {
         if(isNetworkAvailable()){
             mainViewModel.sync(lastUpdate = lastUpdate)
         } else {
-            Toast.makeText(applicationContext, "No internet connection, last update: " + lastUpdate.getDate(), Toast.LENGTH_LONG).show()
+            internetAvailableMsg = "No internet connection, last update: " + lastUpdate.getDate()
         }
 
         mainViewModel.lastUpdate.observe(this, Observer {
@@ -122,6 +120,9 @@ class MainComposeActivity : ComponentActivity() {
                         DayButton()
                         MonthButton()
                         YearButton()
+                    }
+                    if(internetAvailableMsg.isNotEmpty()){
+                        Text(text = internetAvailableMsg, modifier = Modifier.align(Alignment.CenterHorizontally), color = Color.Red)
                     }
                     MyList(onClick)
                 }
