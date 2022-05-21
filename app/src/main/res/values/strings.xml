@@ -13,4 +13,5 @@
     <string name="database">eonvis_db</string>
     <string name="title_activity_main_compose">MainComposeActivity</string>
     <string name="title_activity_details_compose">DetailsComposeActivity</string>
+    <string name="title_activity_datails_tag">DatailsTagActivity</string>
 </resources>

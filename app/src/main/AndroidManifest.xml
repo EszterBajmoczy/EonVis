@@ -11,6 +11,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EonVis">
         <activity
+            android:name=".ui.tags.DetailsTagActivity"
+            android:exported="false"
+            android:label="@string/title_activity_datails_tag"
+            android:theme="@style/Theme.EonVis" />
+        <activity
             android:name=".ui.details.DetailsComposeActivity"
             android:exported="false"
             android:label="@string/title_activity_details_compose"

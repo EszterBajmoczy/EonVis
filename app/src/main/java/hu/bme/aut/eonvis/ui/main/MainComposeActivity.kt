@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -87,7 +86,11 @@ class MainComposeActivity : ComponentActivity() {
                 ) {
                     MyApp {
                         val intent = Intent(this@MainComposeActivity, DetailsComposeActivity::class.java)
-                        intent.putExtra("id", it.id);
+                        intent.putExtra("id", it.id)
+                        intent.putExtra("incoming", it.incoming)
+                        intent.putExtra("outgoing", it.outgoing)
+                        intent.putExtra("tags", it.tagList)
+                        intent.putExtra("type", it.id.getDataType().name)
                         startActivity(intent)
                     }
                 }
@@ -179,7 +182,7 @@ class MainComposeActivity : ComponentActivity() {
 
     @Composable
     fun MyList(onClick: (PowerConsume) -> Unit) {
-        val puppies by dataList
+        val data by dataList
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             modifier = Modifier.scrollEnabled(
@@ -187,7 +190,7 @@ class MainComposeActivity : ComponentActivity() {
             )
         ) {
             items(
-                items = puppies,
+                items = data,
                 itemContent = {
                     ListItem(data = it, onClick = onClick)
                 })
@@ -199,7 +202,8 @@ class MainComposeActivity : ComponentActivity() {
         Card(
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 8.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable { onClick(data) },
             elevation = 2.dp,
             backgroundColor = Color.White,
             shape = RoundedCornerShape(corner = CornerSize(16.dp))
@@ -208,13 +212,12 @@ class MainComposeActivity : ComponentActivity() {
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
-                    .clickable { onClick(data) }
             ) {
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                 ) {
-                    Text(text = data.id.toString(), style = MaterialTheme.typography.h6)
+                    Text(text = data.id.getDate(), style = MaterialTheme.typography.h6)
                     Text(text = list(data.tagList), style = MaterialTheme.typography.caption)
                 }
                 Column(
@@ -224,45 +227,48 @@ class MainComposeActivity : ComponentActivity() {
                         .fillMaxHeight()
                 ){
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(start = 80.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ){
                         Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "KeyboardArrowDown")
                         Text(text = normalize(data.incoming) + " kWh", style = MaterialTheme.typography.caption, color = Color.Red)
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(start = 80.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ){
                         Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = "KeyboardArrowUp")
                         Text(text = normalize(data.outgoing) + " kWh", style = MaterialTheme.typography.caption, color = Color.Green)
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(start = 80.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ){
-                        Sum(data)
-                        Text(text = normalize(data.incoming - data.outgoing) + " kWh", style = MaterialTheme.typography.caption, )
+                        Diff(data.incoming, data.outgoing)
+                        Text(text = normalize(data.incoming - data.outgoing) + " kWh", style = MaterialTheme.typography.caption)
                     }
                 }
             }
         }
     }
+}
 
-    @Composable
-    fun Sum(data: PowerConsume) {
-        if(data.incoming - data.outgoing > 0) {
-            Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "KeyboardArrowDown")
-        } else {
-            Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = "KeyboardArrowUp")
-        }
+fun normalize(data: Double): String {
+    val dataString = data.toString()
+    val point = dataString.indexOf('.')
+    return if(dataString.length > point + 4){
+        dataString.substring(0, point+4)
+    } else {
+        dataString
     }
+}
 
-    private fun normalize(data: Double): String {
-        val dataString = data.toString()
-        val point = dataString.indexOf('.')
-        return if(dataString.length > point + 4){
-            dataString.substring(0, point+4)
-        } else {
-            dataString
-        }
+@Composable
+fun Diff(incoming: Double, outgoing: Double) {
+    if(incoming - outgoing > 0) {
+        Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "KeyboardArrowDown")
+    } else {
+        Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = "KeyboardArrowUp")
     }
 }
 
