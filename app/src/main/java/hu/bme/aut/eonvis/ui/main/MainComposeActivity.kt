@@ -70,27 +70,31 @@ class MainComposeActivity : ComponentActivity() {
                     dataList.value = it
                 })
             }
-        })
-        setContent {
-            EonVisTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    color = MaterialTheme.colors.background
-                ) {
-                    MyApp {
-                        val intent = Intent(this@MainComposeActivity, DetailsComposeActivity::class.java)
-                        intent.putExtra("id", it.id)
-                        intent.putExtra("incoming", it.incoming)
-                        intent.putExtra("outgoing", it.outgoing)
-                        intent.putExtra("tags", it.tagList)
-                        intent.putExtra("type", it.id.getDataType().name)
-                        startActivity(intent)
-
-                        switchButtonTo("Daily")
+            setContent {
+                EonVisTheme {
+                    // A surface container using the 'background' color from the theme
+                    Surface(
+                        color = MaterialTheme.colors.background
+                    ) {
+                        MyApp {
+                            val intent = Intent(this@MainComposeActivity, DetailsComposeActivity::class.java)
+                            intent.putExtra("id", it.id)
+                            intent.putExtra("incoming", it.incoming)
+                            intent.putExtra("outgoing", it.outgoing)
+                            intent.putExtra("tags", it.tagList)
+                            intent.putExtra("type", it.id.getDataType().name)
+                            startActivity(intent)
+                        }
                     }
                 }
             }
-        }
+        })
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        switchButtonTo("Daily")
     }
 
     @Composable

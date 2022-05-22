@@ -5,12 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hu.bme.aut.eonvis.data.DataType
 import hu.bme.aut.eonvis.data.model.PowerConsume
+import hu.bme.aut.eonvis.interfaces.IMainRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(private val repository: MainRepository) : ViewModel() {
+class MainViewModel @Inject constructor(private val repository: IMainRepository) : ViewModel() {
     private val viewModelJob = SupervisorJob()
     private val uiScope = CoroutineScope(Dispatchers.Default + viewModelJob)
 
@@ -33,7 +34,7 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
         computeMonthlyAndYearlyData()
     }
 
-    fun computeMonthlyAndYearlyData() {
+    private fun computeMonthlyAndYearlyData() {
         daily.value?.let{
             _dailyData = daily.value as ArrayList<PowerConsume>
         }

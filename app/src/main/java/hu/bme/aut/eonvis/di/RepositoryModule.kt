@@ -5,7 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import hu.bme.aut.eonvis.converter.DataConverter
-import hu.bme.aut.eonvis.network.EonVisService
+import hu.bme.aut.eonvis.interfaces.IDetailsRepository
+import hu.bme.aut.eonvis.interfaces.IEonVisService
+import hu.bme.aut.eonvis.interfaces.ILoginRepository
+import hu.bme.aut.eonvis.interfaces.IMainRepository
 import hu.bme.aut.eonvis.persistence.EonVisDao
 import hu.bme.aut.eonvis.ui.details.DetailsRepository
 import hu.bme.aut.eonvis.ui.login.LoginRepository
@@ -23,19 +26,19 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLoginRepository(eonVisService: EonVisService): LoginRepository {
+    fun provideLoginRepository(eonVisService: IEonVisService): ILoginRepository {
         return LoginRepository(eonVisService)
     }
 
     @Provides
     @Singleton
-    fun provideMainRepository(eonVisDao: EonVisDao, eonVisService: EonVisService, dataConverter: DataConverter): MainRepository {
+    fun provideMainRepository(eonVisDao: EonVisDao, eonVisService: IEonVisService, dataConverter: DataConverter): IMainRepository {
         return MainRepository(eonVisDao, eonVisService, dataConverter)
     }
 
     @Provides
     @Singleton
-    fun provideDetailsRepository(eonVisDao: EonVisDao, eonVisService: EonVisService, dataConverter: DataConverter): DetailsRepository {
+    fun provideDetailsRepository(eonVisDao: EonVisDao, eonVisService: IEonVisService, dataConverter: DataConverter): IDetailsRepository {
         return DetailsRepository(eonVisDao, eonVisService, dataConverter)
     }
 }

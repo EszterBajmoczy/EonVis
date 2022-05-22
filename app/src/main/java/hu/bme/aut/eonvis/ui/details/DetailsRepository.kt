@@ -4,22 +4,25 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import hu.bme.aut.eonvis.converter.DataConverter
 import hu.bme.aut.eonvis.data.model.PowerConsume
-import hu.bme.aut.eonvis.network.EonVisService
+import hu.bme.aut.eonvis.interfaces.IDetailsRepository
+import hu.bme.aut.eonvis.interfaces.IEonVisService
 import hu.bme.aut.eonvis.persistence.EonVisDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 import javax.inject.Inject
 
-class DetailsRepository @Inject constructor(private val eonVisDao: EonVisDao, private val networkService: EonVisService, private val dataConverter: DataConverter){
+class DetailsRepository @Inject constructor(
+    private val eonVisDao: EonVisDao,
+    private val networkService: IEonVisService,
+    private val dataConverter: DataConverter) : IDetailsRepository {
 
-    fun getAllByInterval(firstId: Long, lastId: Long) : LiveData<List<PowerConsume>> {
+    override fun getAllByInterval(firstId: Long, lastId: Long) : LiveData<List<PowerConsume>> {
         return eonVisDao.getDataByInterval(firstId = firstId, lastId = lastId).map {
                 item -> item.map { data -> dataConverter.convertToModel(data) }
         }
     }
 
-    suspend fun addTagsByInterval(
+    override suspend fun addTagByInterval(
         newTag: String,
         data: List<PowerConsume>
     )
@@ -33,7 +36,7 @@ class DetailsRepository @Inject constructor(private val eonVisDao: EonVisDao, pr
         }
     }
 
-    suspend fun removeTagByInterval(
+    override suspend fun removeTagByInterval(
         tagToRemove: String,
         data: List<PowerConsume>)
             = withContext(Dispatchers.IO) {
@@ -46,7 +49,7 @@ class DetailsRepository @Inject constructor(private val eonVisDao: EonVisDao, pr
         }
     }
 
-    fun getTags(callback: (ArrayList<String>) -> Unit){
+    override fun getTags(callback: (ArrayList<String>) -> Unit){
         networkService.getTags(callback = callback)
     }
 }

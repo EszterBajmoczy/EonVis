@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import hu.bme.aut.eonvis.interfaces.IEonVisService
 import hu.bme.aut.eonvis.network.EonVisService
 import hu.bme.aut.eonvis.persistence.AppDatabase
 import hu.bme.aut.eonvis.persistence.EonVisDao
@@ -16,7 +17,7 @@ import javax.inject.Singleton
 class NetworkModule {
     @Provides
     @Singleton
-    fun provideEonVisNetworkService(): EonVisService {
+    fun provideEonVisNetworkService(): IEonVisService {
         return EonVisService(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
     }
 }

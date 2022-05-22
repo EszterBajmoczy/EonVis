@@ -6,7 +6,8 @@ import androidx.lifecycle.map
 import hu.bme.aut.eonvis.converter.DataConverter
 import hu.bme.aut.eonvis.data.database.PowerConsumeDAO
 import hu.bme.aut.eonvis.data.model.PowerConsume
-import hu.bme.aut.eonvis.network.EonVisService
+import hu.bme.aut.eonvis.interfaces.IEonVisService
+import hu.bme.aut.eonvis.interfaces.IMainRepository
 import hu.bme.aut.eonvis.persistence.EonVisDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,19 +16,24 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-class MainRepository @Inject constructor(private val eonVisDao: EonVisDao, private val networkService: EonVisService, private val dataConverter: DataConverter) {
+class MainRepository @Inject constructor(
+    private val eonVisDao: EonVisDao,
+    private val networkService: IEonVisService,
+    private val dataConverter: DataConverter) : IMainRepository {
 
-    suspend fun add(data: PowerConsumeDAO) = withContext(Dispatchers.IO) {
+    override suspend fun add(data: PowerConsumeDAO) = withContext(Dispatchers.IO) {
         eonVisDao.insertData(data)
     }
 
-    fun getAll() : LiveData<List<PowerConsume>> {
+    override fun getAll() : LiveData<List<PowerConsume>> {
         return eonVisDao.getAllData().map {
-                item -> item.map { data -> dataConverter.convertToModel(data) }
+                item -> item.map {
+                    data -> dataConverter.convertToModel(data)
+                }
         }
     }
 
-    fun syncData(scope: CoroutineScope, lastUpdate: Long, callback: (Long) -> Unit) {
+    override fun syncData(scope: CoroutineScope, lastUpdate: Long, callback: (Long) -> Unit) {
         networkService.getPowerConsumes { result ->
             var lastDataId = lastUpdate
             if(result.id > lastUpdate){
