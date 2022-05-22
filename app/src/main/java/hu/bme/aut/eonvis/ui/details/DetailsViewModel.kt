@@ -8,6 +8,7 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import hu.bme.aut.eonvis.data.DataType
 import hu.bme.aut.eonvis.data.model.PowerConsume
+import hu.bme.aut.eonvis.interfaces.IDetailsRepository
 import hu.bme.aut.eonvis.ui.main.getDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-class DetailsViewModel @Inject constructor(private val repository: DetailsRepository) : ViewModel(){
+class DetailsViewModel @Inject constructor(private val repository: IDetailsRepository) : ViewModel(){
     private val viewModelJob = SupervisorJob()
     private val uiScope = CoroutineScope(Dispatchers.Default + viewModelJob)
 

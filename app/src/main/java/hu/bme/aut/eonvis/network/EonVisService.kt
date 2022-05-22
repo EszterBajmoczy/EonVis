@@ -1,32 +1,32 @@
 package hu.bme.aut.eonvis.network
 
-import android.net.ConnectivityManager
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import hu.bme.aut.eonvis.data.model.PowerConsume
+import hu.bme.aut.eonvis.interfaces.IEonVisService
 
 
-class EonVisService constructor(private val mAuth: FirebaseAuth, private var db: FirebaseFirestore)  {
+class EonVisService constructor(private val mAuth: FirebaseAuth, private var db: FirebaseFirestore) : IEonVisService  {
     private var userId: String? = null
 
     init {
         userId = mAuth.currentUser?.uid
     }
 
-    fun login(username: String, password: String, loginCallback: (Boolean) -> Unit) {
+    override fun login(username: String, password: String, loginCallback: (Boolean) -> Unit) {
         mAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener { task ->
             loginCallback(task.isSuccessful)
             userId = mAuth.currentUser?.uid
         }
     }
 
-    fun isLoggedIn(callback: (Boolean) -> Unit) {
+    override fun isLoggedIn(callback: (Boolean) -> Unit) {
         callback(mAuth.currentUser != null)
     }
 
-    fun getPowerConsumes(callback: (PowerConsume) -> Unit) {
+    override fun getPowerConsumes(callback: (PowerConsume) -> Unit) {
         db.collection(userId!!).get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 for (firebaseData in task.result!!.documents) {
@@ -55,7 +55,7 @@ class EonVisService constructor(private val mAuth: FirebaseAuth, private var db:
         }
     }
 
-    fun addTag(id: Long, tag: String) {
+    override fun addTag(id: Long, tag: String) {
         val data: MutableMap<String, Any> = HashMap()
         data[tag] = tag
 
@@ -63,7 +63,7 @@ class EonVisService constructor(private val mAuth: FirebaseAuth, private var db:
             .update(data)
     }
 
-    fun removeTag(id: Long, tag: String) {
+    override fun removeTag(id: Long, tag: String) {
         val deleteTag: MutableMap<String, Any> = HashMap()
         deleteTag[tag] = FieldValue.delete()
 
@@ -71,7 +71,7 @@ class EonVisService constructor(private val mAuth: FirebaseAuth, private var db:
             .update(deleteTag)
     }
 
-    fun getTags(callback: (ArrayList<String>) -> Unit) {
+    override fun getTags(callback: (ArrayList<String>) -> Unit) {
         db.collection(userId!!)
             .get()
             .addOnCompleteListener { task ->
