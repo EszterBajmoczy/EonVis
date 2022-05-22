@@ -5,84 +5,73 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import hu.bme.aut.eonvis.data.model.PowerConsume
+import hu.bme.aut.eonvis.interfaces.IEonVisService
 
 
-class EonVisService constructor(private val mAuth: FirebaseAuth, private var db: FirebaseFirestore)  {
+class EonVisService constructor(private val mAuth: FirebaseAuth, private var db: FirebaseFirestore) : IEonVisService  {
     private var userId: String? = null
 
     init {
         userId = mAuth.currentUser?.uid
     }
 
-    fun login(username: String, password: String, loginCallback: (Boolean) -> Unit) {
+    override fun login(username: String, password: String, loginCallback: (Boolean) -> Unit) {
         mAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener { task ->
             loginCallback(task.isSuccessful)
             userId = mAuth.currentUser?.uid
         }
     }
 
-    fun isLoggedIn(callback: (Boolean) -> Unit) {
+    override fun isLoggedIn(callback: (Boolean) -> Unit) {
         callback(mAuth.currentUser != null)
     }
 
-    fun getPowerConsumes(callback: (List<PowerConsume>) -> Unit) {
+    override fun getPowerConsumes(callback: (PowerConsume) -> Unit) {
         db.collection(userId!!).get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val list = ArrayList<PowerConsume>()
                 for (firebaseData in task.result!!.documents) {
                     try {
-                        val data = PowerConsume(
-                            id = firebaseData.getLong("id")!!,
-                            incoming = firebaseData.getDouble("incoming")!!,
-                            outgoing = firebaseData.getDouble("outgoing")!!)
                         firebaseData.reference.collection("tags")
                             .document("tags")
                             .get()
                             .addOnCompleteListener { tagData ->
+                                val data = PowerConsume(
+                                    id = firebaseData.getLong("id")!!,
+                                    incoming = firebaseData.getDouble("incoming")!!,
+                                    outgoing = firebaseData.getDouble("outgoing")!!)
                                 val tagList = ArrayList<String>()
                                 tagData.result.data?.values?.forEach { tag -> tagList.add(tag.toString()) }
                                 data.addTags(tagList)
+
+                                callback(data)
                             }
-                        list.add(data)
                     } catch (e: Exception){
                         Log.d("Firebase", "Invalid data format.")
                     }
                 }
-                callback(list)
             } else {
                 Log.d("Firebase", "No data for user")
             }
         }
     }
 
-    fun addTag(id: Long, tag: String, callback: (Boolean) -> Unit) {
+    override fun addTag(id: Long, tag: String) {
         val data: MutableMap<String, Any> = HashMap()
         data[tag] = tag
 
         db.collection(userId!!).document(id.toString()).collection("tags").document("tags")
-            .update(data).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                callback(true)
-            } else {
-                callback(false)
-            }
-        }
+            .update(data)
     }
 
-    fun removeTag(id: Long, tag: String, callback: (Boolean) -> Unit) {
+    override fun removeTag(id: Long, tag: String) {
         val deleteTag: MutableMap<String, Any> = HashMap()
         deleteTag[tag] = FieldValue.delete()
 
-        db.collection(userId!!).document(id.toString()).collection("tags").document("tags").update(deleteTag).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                callback(true)
-            } else {
-                callback(false)
-            }
-        }
+        db.collection(userId!!).document(id.toString()).collection("tags").document("tags")
+            .update(deleteTag)
     }
 
-    fun getTags(callback: (List<String>) -> Unit) {
+    override fun getTags(callback: (ArrayList<String>) -> Unit) {
         db.collection(userId!!)
             .get()
             .addOnCompleteListener { task ->

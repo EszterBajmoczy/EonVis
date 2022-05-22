@@ -16,7 +16,7 @@ import android.widget.EditText
 import android.widget.Toast
 import dagger.hilt.android.AndroidEntryPoint
 import hu.bme.aut.eonvis.databinding.ActivityLoginBinding
-import hu.bme.aut.eonvis.ui.main.MainActivity
+import hu.bme.aut.eonvis.ui.main.MainComposeActivity
 
 import javax.inject.Inject
 
@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
 
         loginViewModel.isLoggedIn.observe(this@LoginActivity, Observer {
             if(it) {
-                val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                val intent = Intent(this@LoginActivity, MainComposeActivity::class.java)
                 startActivity(intent)
                 finish()
             }
@@ -73,7 +73,7 @@ class LoginActivity : AppCompatActivity() {
             }
             setResult(Activity.RESULT_OK)
 
-            val intent = Intent(this@LoginActivity, MainActivity::class.java)
+            val intent = Intent(this@LoginActivity, MainComposeActivity::class.java)
             startActivity(intent)
             finish()
         })

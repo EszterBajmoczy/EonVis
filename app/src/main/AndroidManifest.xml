@@ -2,14 +2,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="hu.bme.aut.eonvis">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".EonVisApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EonVis">
+        <activity
+            android:name=".ui.tags.DetailsTagActivity"
+            android:exported="false"
+            android:label="@string/title_activity_datails_tag"
+            android:theme="@style/Theme.EonVis" />
+        <activity
+            android:name=".ui.details.DetailsComposeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_details_compose"
+            android:theme="@style/Theme.EonVis" />
+        <activity
+            android:name=".ui.main.MainComposeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_main_compose"
+            android:theme="@style/Theme.EonVis" />
         <activity
             android:name=".ui.details.DetailsActivity"
             android:exported="false" />

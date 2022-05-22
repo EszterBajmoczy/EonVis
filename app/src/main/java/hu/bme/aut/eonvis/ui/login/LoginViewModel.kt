@@ -5,9 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import hu.bme.aut.eonvis.R
+import hu.bme.aut.eonvis.interfaces.ILoginRepository
 import javax.inject.Inject
 
-class LoginViewModel @Inject constructor(private val loginRepository: LoginRepository) : ViewModel() {
+class LoginViewModel @Inject constructor(private val loginRepository: ILoginRepository) : ViewModel() {
 
     private val _isLoggedIn = MutableLiveData<Boolean>()
     val isLoggedIn: LiveData<Boolean> = _isLoggedIn
