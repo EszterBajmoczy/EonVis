@@ -3,6 +3,7 @@ package hu.bme.aut.eonvis.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import hu.bme.aut.eonvis.data.DataType
 import hu.bme.aut.eonvis.data.model.PowerConsume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,12 +33,15 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
         computeMonthlyAndYearlyData()
     }
 
-    private fun computeMonthlyAndYearlyData() {
+    fun computeMonthlyAndYearlyData() {
         daily.value?.let{
             _dailyData = daily.value as ArrayList<PowerConsume>
         }
         val monthIds = ArrayList<Long>()
         val yearIds = ArrayList<Long>()
+
+        _monthlyData = ArrayList()
+        _yearlyData = ArrayList()
 
         daily.value?.forEach { data ->
             if (!monthIds.contains(data.id.withoutLastTwo())){
@@ -101,15 +105,56 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
     }
 
     fun changeList(state: String) {
-        if(state == "Daily"){
-            _list.value = _dailyData
-        } else if (state == "Monthly") {
-            _list.value = _monthlyData
-        } else if (state == "Yearly") {
-            _list.value = _yearlyData
+        when (state) {
+            "Daily" -> {
+                _list.value = _dailyData
+            }
+            "Monthly" -> {
+                _list.value = _monthlyData
+            }
+            "Yearly" -> {
+                _list.value = _yearlyData
+            }
         }
     }
 }
 
 fun Long.withoutLastTwo():Long = this/100
-fun Long.getDate():String = this.toString().substring(0,3) + "." + this.toString().substring(4,5) + "." + this.toString().substring(6,8)
+fun Long.getDate():String {
+    when {
+        this.getDataType() == DataType.Daily -> {
+            return this.toString().substring(0,4) + "." + this.toString().substring(4,6) + "." + this.toString().substring(6)
+        }
+        this.getDataType() == DataType.Monthly -> {
+            return this.toString().substring(0,4) + "." + this.toString().substring(4)
+        }
+    }
+    return this.toString()
+}
+fun Long.getMonthAndYear():String = this.toString().substring(0,4) + "." + this.toString().substring(4)
+fun Long.getDataType():DataType {
+    return when {
+        this >= 10000000 -> {
+            DataType.Daily
+        }
+        this >= 100000 -> {
+            DataType.Monthly
+        }
+        else -> {
+            DataType.Yearly
+        }
+    }
+}
+
+fun Long.getDay():String {
+    var result = this.toString().substring(6)
+    if(result == "00"){
+        result = "01"
+    }
+    return result
+}
+
+fun Long.getMonthAndDay():String {
+    return this.toString().substring(4, 6) + "." + this.getDay()
+}
+

@@ -14,4 +14,12 @@ class DataConverter {
     fun convertToModel(data: PowerConsumeDAO) : PowerConsume {
         return PowerConsume(data.id, data.incoming, data.outgoing, arrayTypeConverter.toArray(data.tags))
     }
+
+    fun convertTagsToString(tags: List<String>): String {
+        return arrayTypeConverter.fromArray(tags)
+    }
+
+    fun convertStringToTags(tags: String): ArrayList<String> {
+        return arrayTypeConverter.toArray(tags)
+    }
 }

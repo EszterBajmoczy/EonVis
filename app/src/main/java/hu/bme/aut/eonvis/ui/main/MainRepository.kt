@@ -15,8 +15,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-class MainRepository @Inject constructor(private val eonVisDao: EonVisDao, private val networkService: EonVisService) {
-    private val dataConverter = DataConverter()
+class MainRepository @Inject constructor(private val eonVisDao: EonVisDao, private val networkService: EonVisService, private val dataConverter: DataConverter) {
 
     suspend fun add(data: PowerConsumeDAO) = withContext(Dispatchers.IO) {
         eonVisDao.insertData(data)

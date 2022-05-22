@@ -6,6 +6,14 @@ class PowerConsume (val id: Long, var incoming: Double, var outgoing: Double, va
         tagList.addAll(tags)
     }
 
+    fun addTag(tag: String) {
+        tagList.add(tag)
+    }
+
+    fun removeTag(tag: String) {
+        tagList.remove(tag)
+    }
+
     fun getTags(): ArrayList<String>{
         return tagList
     }

@@ -55,34 +55,23 @@ class EonVisService constructor(private val mAuth: FirebaseAuth, private var db:
         }
     }
 
-    fun addTag(id: Long, tag: String, callback: (Boolean) -> Unit) {
+    fun addTag(id: Long, tag: String) {
         val data: MutableMap<String, Any> = HashMap()
         data[tag] = tag
 
         db.collection(userId!!).document(id.toString()).collection("tags").document("tags")
-            .update(data).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                callback(true)
-            } else {
-                callback(false)
-            }
-        }
+            .update(data)
     }
 
-    fun removeTag(id: Long, tag: String, callback: (Boolean) -> Unit) {
+    fun removeTag(id: Long, tag: String) {
         val deleteTag: MutableMap<String, Any> = HashMap()
         deleteTag[tag] = FieldValue.delete()
 
-        db.collection(userId!!).document(id.toString()).collection("tags").document("tags").update(deleteTag).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                callback(true)
-            } else {
-                callback(false)
-            }
-        }
+        db.collection(userId!!).document(id.toString()).collection("tags").document("tags")
+            .update(deleteTag)
     }
 
-    fun getTags(callback: (List<String>) -> Unit) {
+    fun getTags(callback: (ArrayList<String>) -> Unit) {
         db.collection(userId!!)
             .get()
             .addOnCompleteListener { task ->
