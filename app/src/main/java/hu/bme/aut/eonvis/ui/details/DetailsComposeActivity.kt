@@ -1,31 +1,35 @@
 package hu.bme.aut.eonvis.ui.details
 
+import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Observer
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import dagger.hilt.android.AndroidEntryPoint
+import hu.bme.aut.eonvis.R
 import hu.bme.aut.eonvis.data.DataType
 import hu.bme.aut.eonvis.ui.details.ui.theme.EonVisTheme
 import hu.bme.aut.eonvis.ui.main.*
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class DetailsComposeActivity : ComponentActivity() {
@@ -40,7 +44,10 @@ class DetailsComposeActivity : ComponentActivity() {
 
     private var tagList = mutableStateOf(ArrayList<String>())
 
-    private var newTag: String = "Create new tag"
+    private var newTag: String = "New tag"
+
+    private var lineChart: LineChart? = null
+    private var lineChartData = ArrayList<ILineDataSet>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +78,23 @@ class DetailsComposeActivity : ComponentActivity() {
         detailsViewModel.tagList.observe(this, Observer { list ->
             tagList.value = list
         })
+
+        setContentView(R.layout.activity_details)
+
+    }
+
+    private fun configureLineChart() {
+        val desc = Description()
+        desc.textSize = 28F
+        lineChart!!.description = desc
+        val xAxis = lineChart!!.xAxis
+        xAxis.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                if(type == DataType.Yearly)
+                    return value.toLong().getMonthAndDay()
+                return value.toLong().getDay()
+            }
+        }
     }
 
     private fun setDetailsContent() {
@@ -97,33 +121,49 @@ class DetailsComposeActivity : ComponentActivity() {
                         Modifier
                             .fillMaxWidth()
                             .fillMaxHeight()
-                            .background(Color.White)
+                            .background(Color.LightGray)
                     ) {
-                        MyList { tag ->
-                            val isNew = !tags.contains(tag)
-                            if (isNew) {
-                                tags.add(tag)
-                                detailsViewModel.addTag(tagToAdd = tag)
-                            }
-                            setDetailsContent()
-                        }
-                        SimpleTextField()
-                        Button(colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color.White),
-                            onClick = {
-                                if(newTag != "Create new tag"){
-                                    tags.add(newTag)
-                                    detailsViewModel.addTag(tagToAdd = newTag)
-                                    setDetailsContent()
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        )  {
+                            MyList { tag ->
+                                val isNew = !tags.contains(tag)
+                                if (isNew) {
+                                    tags.add(tag)
+                                    detailsViewModel.addTag(tagToAdd = tag)
                                 }
-                            }) {
-                            Text(text = "Add")
+                                setDetailsContent()
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().background(Color.White),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            EditTextField()
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Button(colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color.White),
+                                onClick = {
+                                    if(newTag != "New tag"){
+                                        tags.add(newTag)
+                                        detailsViewModel.addTag(tagToAdd = newTag)
+                                        setDetailsContent()
+                                    }
+                                }) {
+                                Text(text = "Add")
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 
     @Composable()
     fun Details() {
@@ -138,11 +178,31 @@ class DetailsComposeActivity : ComponentActivity() {
                     Text(text = getViewTitle(), style = MaterialTheme.typography.h4)
                 }
 
-                Incoming()
-                Outgoing()
-                Difference()
+                Incoming(incoming)
+                Outgoing(outgoing)
+                Difference(incoming, outgoing)
 
                 Tags()
+
+                if(type != DataType.Daily){
+
+                    AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { context: Context ->
+                            val view = LayoutInflater.from(context)
+                                .inflate(R.layout.activity_details, null, false)
+
+                            lineChart = view.findViewById(R.id.activity_main_linechart)
+
+                            configureLineChart()
+                            lineChartData = detailsViewModel.dataSets(resources.getColor(R.color.red, null), resources.getColor(R.color.green, null))
+                            val lineData = LineData(lineChartData)
+                            lineChart!!.data = lineData
+                            lineChart!!.invalidate()
+                            view
+                        }
+                    )
+                }
             }
         })
     }
@@ -208,14 +268,13 @@ class DetailsComposeActivity : ComponentActivity() {
     }
 
     @Composable
-    fun SimpleTextField() {
+    fun EditTextField() {
         var textValue by remember { mutableStateOf(newTag) }
         BasicTextField(
             value = textValue,
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth()
-                .background(Color.LightGray),
+                .fillMaxWidth(),
             // Update value of textValue with the latest value of the text field
             onValueChange = {
                 textValue = it
@@ -227,7 +286,7 @@ class DetailsComposeActivity : ComponentActivity() {
     @Composable
     fun MyList(onClick: (String) -> Unit) {
         val tagStrings by tagList
-        LazyColumn(
+        LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             modifier = Modifier.scrollEnabled(
                 enabled = true, //provide a mutable state boolean here
@@ -236,111 +295,9 @@ class DetailsComposeActivity : ComponentActivity() {
             items(
                 items = tagStrings,
                 itemContent = {
-                    ListItem(tag = it, onClick = onClick)
+                    TagListItem(tag = it, onClick = onClick)
                 })
         }
-    }
-
-    @Composable
-    fun ListItem(tag: String, onClick: (String) -> Unit) {
-        Card(
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 8.dp)
-                .clickable { onClick(tag) },
-            elevation = 2.dp,
-            backgroundColor = Color.Blue,
-            shape = RoundedCornerShape(corner = CornerSize(16.dp))
-        ) {
-            Text(text = tag, style = MaterialTheme.typography.h6, modifier = Modifier
-                .padding(6.dp))
-        }
-    }
-
-    @Composable
-    fun Incoming() {
-        Row(modifier = Modifier.padding(top = 24.dp)) {
-            Column {
-                Row {
-                    Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "KeyboardArrowDown")
-                    Text(text = "incoming", style = MaterialTheme.typography.h6)
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 80.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        text = normalize(incoming) + " kWh",
-                        style = MaterialTheme.typography.h6,
-                        color = Color.Red
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun Outgoing() {
-        Row {
-            Column {
-                Row {
-                    Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = "KeyboardArrowUp")
-                    Text(text = "outgoing", style = MaterialTheme.typography.h6)
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 80.dp),
-                        horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        text = normalize(outgoing) + " kWh",
-                        style = MaterialTheme.typography.h6,
-                        color = Color.Green
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun Difference() {
-        Row(modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)) {
-            Column {
-                Row {
-                    Diff(incoming, outgoing)
-                    Text(text = "difference", style = MaterialTheme.typography.h6)
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 80.dp),
-                        horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        text = normalize(incoming - outgoing) + " kWh",
-                        style = MaterialTheme.typography.h6
-                    )
-                }
-            }
-        }
-
     }
 
     private fun getViewTitle(): String {
@@ -349,7 +306,7 @@ class DetailsComposeActivity : ComponentActivity() {
                 "Daily - " + id.getDate()
             }
             id.getDataType() == DataType.Monthly -> {
-                "Monthly - " + id.getMonth()
+                "Monthly - " + id.getMonthAndYear()
             }
             else -> {
                 "Yearly - $id"

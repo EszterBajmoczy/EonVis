@@ -131,7 +131,7 @@ fun Long.getDate():String {
     }
     return this.toString()
 }
-fun Long.getMonth():String = this.toString().substring(0,4) + "." + this.toString().substring(4)
+fun Long.getMonthAndYear():String = this.toString().substring(0,4) + "." + this.toString().substring(4)
 fun Long.getDataType():DataType {
     return when {
         this >= 10000000 -> {
@@ -145,3 +145,16 @@ fun Long.getDataType():DataType {
         }
     }
 }
+
+fun Long.getDay():String {
+    var result = this.toString().substring(6)
+    if(result == "00"){
+        result = "01"
+    }
+    return result
+}
+
+fun Long.getMonthAndDay():String {
+    return this.toString().substring(4, 6) + "." + this.getDay()
+}
+

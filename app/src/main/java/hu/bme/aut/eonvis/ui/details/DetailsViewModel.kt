@@ -3,13 +3,18 @@ package hu.bme.aut.eonvis.ui.details
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import hu.bme.aut.eonvis.data.DataType
 import hu.bme.aut.eonvis.data.model.PowerConsume
+import hu.bme.aut.eonvis.ui.main.getDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 class DetailsViewModel @Inject constructor(private val repository: DetailsRepository) : ViewModel(){
     private val viewModelJob = SupervisorJob()
@@ -22,6 +27,46 @@ class DetailsViewModel @Inject constructor(private val repository: DetailsReposi
 
     private val _tagList = MutableLiveData<ArrayList<String>>()
     var tagList: LiveData<ArrayList<String>> = _tagList
+
+    fun dataSets(incomingColor: Int, outgoingColor: Int): ArrayList<ILineDataSet> {
+        val dataSets: ArrayList<ILineDataSet> = ArrayList()
+
+        val labels = ArrayList<String>()
+        val incomingList = ArrayList<Entry>()
+        val outgoingList = ArrayList<Entry>()
+
+        data?.value?.forEach { value ->
+            labels.add(value.id.getDate())
+            incomingList.add(Entry(value.id.toFloat(), value.incoming.toFloat()))
+            outgoingList.add(Entry(value.id.toFloat(), value.outgoing.toFloat()))
+        }
+        val incomingLineDataSet = LineDataSet(
+            incomingList,
+            "incoming"
+        )
+        incomingLineDataSet.setDrawCircles(true)
+        incomingLineDataSet.circleRadius = 4f
+        incomingLineDataSet.setDrawValues(false)
+        incomingLineDataSet.lineWidth = 3f
+        incomingLineDataSet.color = incomingColor
+        incomingLineDataSet.setCircleColor(incomingColor)
+        dataSets.add(incomingLineDataSet)
+
+        val outgoingLineDataSet = LineDataSet(
+            outgoingList,
+            "outgoing"
+        )
+        outgoingLineDataSet.setDrawCircles(true)
+        outgoingLineDataSet.circleRadius = 4f
+        outgoingLineDataSet.setDrawValues(false)
+        outgoingLineDataSet.lineWidth = 3f
+        outgoingLineDataSet.color = outgoingColor
+        outgoingLineDataSet.setCircleColor(outgoingColor)
+        dataSets.add(outgoingLineDataSet)
+
+
+        return dataSets
+    }
 
     fun loadData(firstId: Long, type: DataType) {
         when (type) {
@@ -36,7 +81,7 @@ class DetailsViewModel @Inject constructor(private val repository: DetailsReposi
             }
             DataType.Yearly -> {
                 first = firstId*10000
-                last = first + 366
+                last = first + 10000
             }
         }
 
