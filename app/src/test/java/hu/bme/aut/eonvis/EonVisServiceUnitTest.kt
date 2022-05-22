@@ -9,17 +9,8 @@ import hu.bme.aut.eonvis.network.EonVisService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.hamcrest.CoreMatchers.any
-import org.junit.Assert
 import org.junit.Test
 
-import org.junit.Assert.*
-
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class EonVisServiceUnitTest {
     private val _sut: EonVisService
 
