@@ -92,7 +92,7 @@ class DetailsViewModel @Inject constructor(private val repository: IDetailsRepos
     fun addTag(tagToAdd: String) {
         data?.value?.let {
             uiScope.launch {
-                repository.addTagsByInterval(newTag = tagToAdd, it)
+                repository.addTagByInterval(newTag = tagToAdd, it)
             }
         }
     }

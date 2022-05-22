@@ -6,7 +6,7 @@ import hu.bme.aut.eonvis.data.model.PowerConsume
 interface IDetailsRepository {
     fun getAllByInterval(firstId: Long, lastId: Long) : LiveData<List<PowerConsume>>
 
-    suspend fun addTagsByInterval(
+    suspend fun addTagByInterval(
         newTag: String,
         data: List<PowerConsume>
     )

@@ -34,7 +34,7 @@ class MainViewModel @Inject constructor(private val repository: IMainRepository)
         computeMonthlyAndYearlyData()
     }
 
-    fun computeMonthlyAndYearlyData() {
+    private fun computeMonthlyAndYearlyData() {
         daily.value?.let{
             _dailyData = daily.value as ArrayList<PowerConsume>
         }

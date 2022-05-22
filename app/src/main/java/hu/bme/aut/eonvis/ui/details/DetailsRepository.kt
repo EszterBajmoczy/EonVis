@@ -22,7 +22,7 @@ class DetailsRepository @Inject constructor(
         }
     }
 
-    override suspend fun addTagsByInterval(
+    override suspend fun addTagByInterval(
         newTag: String,
         data: List<PowerConsume>
     )

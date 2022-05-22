@@ -27,7 +27,9 @@ class MainRepository @Inject constructor(
 
     override fun getAll() : LiveData<List<PowerConsume>> {
         return eonVisDao.getAllData().map {
-                item -> item.map { data -> dataConverter.convertToModel(data) }
+                item -> item.map {
+                    data -> dataConverter.convertToModel(data)
+                }
         }
     }
 
