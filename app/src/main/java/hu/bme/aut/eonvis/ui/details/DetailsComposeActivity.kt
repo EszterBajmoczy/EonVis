@@ -23,6 +23,9 @@ import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import hu.bme.aut.eonvis.R
 import hu.bme.aut.eonvis.data.DataType
@@ -35,6 +38,8 @@ import javax.inject.Inject
 class DetailsComposeActivity : ComponentActivity() {
     @Inject
     lateinit var detailsViewModel: DetailsViewModel
+
+    private var analytics = Firebase.analytics
 
     private var id: Long = 0
     private var incoming: Double = 0.0
@@ -152,6 +157,11 @@ class DetailsComposeActivity : ComponentActivity() {
                                     if(newTag != "New tag"){
                                         tags.add(newTag)
                                         detailsViewModel.addTag(tagToAdd = newTag)
+
+                                        analytics.logEvent("Tag_modification") {
+                                            param("tag", newTag)
+                                            param("operation", "create")
+                                        }
                                         setDetailsContent()
                                     }
                                 }) {
@@ -258,6 +268,11 @@ class DetailsComposeActivity : ComponentActivity() {
                             onClick = {
                                 tags.remove(tag)
                                 detailsViewModel.removeTag(tagToRemove = tag)
+
+                                analytics.logEvent("Tag_modification") {
+                                    param("tag", "newTag")
+                                    param("operation", "remove")
+                                }
                             }) {
                             Text(text = "-")
                         }
